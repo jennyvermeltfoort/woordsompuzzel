@@ -1,0 +1,10 @@
+.vscode/
+*.o
+WoordSomPuzzel
+docs/*.aux
+docs/*.fdb_latexmk
+docs/*.fls
+docs/*.log
+docs/*.pdf
+docs/*.synctex.gz
+docs/*.out
