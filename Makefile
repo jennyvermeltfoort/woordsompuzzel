@@ -11,7 +11,7 @@ clean:
 	rm -f *.o WoordSomPuzzel
 
 pman.o: pman.c pman.h
-	gcc -O1 --std=c99 -g -c -Wall  pman.c
+	gcc --std=c99 -g -c -Wall  pman.c
 
 standaard.o: standaard.cc standaard.h
 	$(CC) $(CompileParms) standaard.cc
