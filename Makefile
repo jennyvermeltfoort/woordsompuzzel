@@ -1,8 +1,8 @@
 CC = g++
 
-CompileParms = -c -Wall -std=c++11 -O2
+CompileParms = -c -g -Wall -std=c++11 
 
-OBJS = kern.o standaard.o woordsompuzzel.o main.o
+OBJS =  standaard.o woordsompuzzel.o main.o pman.o
 
 Opdr: $(OBJS)
 	$(CC) $(OBJS) -o WoordSomPuzzel
@@ -10,15 +10,14 @@ Opdr: $(OBJS)
 clean:
 	rm -f *.o WoordSomPuzzel
 
-kern.o: kern.c kern.h
-	$(CC) $(CompileParms)  kern.c
+pman.o: pman.c pman.h
+	gcc -O1 --std=c99 -g -c -Wall  pman.c
 
 standaard.o: standaard.cc standaard.h
-	$(CC) $(CompileParms)  standaard.cc
+	$(CC) $(CompileParms) standaard.cc
 
-woordsompuzzel.o: woordsompuzzel.cc kern.h constantes.h woordsompuzzel.h
-	$(CC) $(CompileParms)  woordsompuzzel.cc
+woordsompuzzel.o: woordsompuzzel.cc pman.h constantes.h woordsompuzzel.h
+	$(CC) $(CompileParms) woordsompuzzel.cc
 
-main.o: main.cc kern.h constantes.h woordsompuzzel.h
-	$(CC) $(CompileParms)  main.cc
-
+main.o: main.cc pman.h constantes.h woordsompuzzel.h
+	$(CC) $(CompileParms) main.cc

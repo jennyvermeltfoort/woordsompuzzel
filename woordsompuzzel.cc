@@ -6,6 +6,7 @@
 #include "woordsompuzzel.h"
 
 #include <cstring>
+#include <exception>
 #include <iostream>
 
 #include "standaard.h"
@@ -16,32 +17,36 @@ using namespace std;
 
 WoordSomPuzzel::WoordSomPuzzel() {}  // default constructor
 
+WoordSomPuzzel::~WoordSomPuzzel() {
+    if (phandle != NULL) {
+        pman_destroy(phandle);
+    }
+}  // default constructor
+
 //*************************************************************************
 
 WoordSomPuzzel::WoordSomPuzzel(int nwGrondtal, string nwwoord0,
                                string nwwoord1, string nwwoord2) {
-    std::strcpy(pman.woord[0], nwwoord0.c_str());
-    std::strcpy(pman.woord[1], nwwoord1.c_str());
-    std::strcpy(pman.woord[2], nwwoord2.c_str());
-    pman.lengtes[0] = nwwoord0.length();
-    pman.lengtes[1] = nwwoord1.length();
-    pman.lengtes[2] = nwwoord2.length();
-
-    if (!pman_puzzel_bereken_validiteit(&pman)) {
-        throw new exception("Deze puzzel is niet valide.");
-    };
+    phandle =
+        pman_create(nwGrondtal, nwwoord0.c_str(), nwwoord0.length(),
+                    nwwoord1.c_str(), nwwoord1.length(),
+                    nwwoord2.c_str(), nwwoord2.length());
+    if (phandle == NULL) {
+        throw new runtime_error("Deze puzzel is niet valide.");
+    }
 }  // constructor met parameters
 
 //*************************************************************************
 
 void WoordSomPuzzel::drukAfPuzzel() {
-    pman_print(&pman);
+    pman_print(phandle);
 }  // drukAfPuzzel
 
 //*************************************************************************
 
 bool WoordSomPuzzel::kenWaardeToe(char kar, int nwWaarde) {
-    return (pman_verstrek_waarde(&pman, kar, nwWaarde) == PMAN_RES_OK)
+    return (pman_waarde_verstrek(phandle, kar, nwWaarde) ==
+            PMAN_RES_OK)
                ? true
                : false;
 }  // kenWaardeToe
@@ -49,16 +54,23 @@ bool WoordSomPuzzel::kenWaardeToe(char kar, int nwWaarde) {
 //*************************************************************************
 
 bool WoordSomPuzzel::maakLetterVrij(char kar) {
-    return (pman_ontdoe_waarde(&pman, kar) == PMAN_RES_OK) ? true
-                                                           : false;
+    return (pman_waarde_ontdoe(phandle, kar) == PMAN_RES_OK) ? true
+                                                             : false;
 }  // maakLetterVrij
 
 //*************************************************************************
 
 int WoordSomPuzzel::zoekOplossingen(
     long long &deeloplossingen, vector<pair<char, int> > &oplossing) {
-    deeloplossingen = 0;
-    return 0;
+    pman_oplossing_t o = {};
+    int oplossingen = pman_zoek_oplossingen(phandle, &o);
+    deeloplossingen = o.bekeken;
+
+    for (int i = 0; i < o.size; i++) {
+        oplossing.push_back({o.letter[i], o.waarde[i]});
+    }
+
+    return oplossingen;
 }  // zoekOplossingen
 
 //*************************************************************************

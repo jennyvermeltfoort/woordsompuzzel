@@ -18,6 +18,7 @@ class WoordSomPuzzel {
    public:
     // Default constructor
     WoordSomPuzzel();
+    ~WoordSomPuzzel();
 
     // Constructor met parameters
     // Controleer
@@ -107,7 +108,7 @@ class WoordSomPuzzel {
     int construeerPuzzels(string &mogelijkWoord2);
 
    private:
-    pman_t pman;  // puzzel manager
+    const pman_handle_t *phandle;  // puzzel manager
 };
 
 #endif
