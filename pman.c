@@ -231,6 +231,7 @@ int zoek_oplossing(pman_t* pman, rlo_t* rlo, int ul_index,
         char wl1 = woord_neem_letter(pman, 1, 5);
         char wl2 = woord_neem_letter(pman, 2, 5);
         // todo make this shit also nicer.
+
         if (pman->c[6] != 1 && neem_waarde(pman, wl0) != 0 &&
             neem_waarde(pman, wl1) != 0 &&
             neem_waarde(pman, wl2) != 0 &&
