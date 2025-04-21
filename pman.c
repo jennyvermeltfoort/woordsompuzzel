@@ -75,7 +75,7 @@ bool heeft_letter(pman_t* pman, char l) {
 
 // inline
 void geef_letter(pman_t* p, char l) {
-    if (!heeft_letter(p, l)) {
+    if (!heeft_letter(p, l) && !letter_is_verstrekt(p, l)) {
         p->heeft_letter[(int)l] = true;
         p->letters[p->aantal_letters++] = l;
         p->letters[p->aantal_letters] = LETTER_UNDF;
@@ -143,7 +143,7 @@ pman_res_t waarde_ontdoe(pman_t* pman, char l) {
         pman->is_letter_verstrekt[(int)l] = false;
         pman->is_waarde_verstrekt[pman->letter_waarde[(int)l]] =
             false;
-        pman->letter_waarde[(int)l] = 0;  // waarom?
+        pman->letter_waarde[(int)l] = WAARDE_UNDF;  // waarom?
         return PMAN_RES_OK;
     }
     return PMAN_RES_ERR;
@@ -161,6 +161,20 @@ void kopieer_oplossing(pman_t* pman, pman_oplossing_t* o) {
 void zoek_oplossing(pman_t* pman, pman_oplossing_t* o, rlo_t* rlo,
                     int li, int ki);
 
+pman_res_t check_linkse_kolom(pman_t* p) {
+    int ki = max(p->handle.lengtes[0], p->handle.lengtes[1]) - 1;
+    char wl[3] = PMAN_NEEM_LETTERS_KOLOM(p, ki);
+
+    if (letter_is_verstrekt(p, wl[0]) &&
+        letter_is_verstrekt(p, wl[1])) {
+        int w = neem_waarde(p, wl[0]) + neem_waarde(p, wl[1]);
+        if ((w > p->handle.grondgetal) != p->c[ki + 1]) {
+            return PMAN_RES_OK;
+        }
+    }
+    return PMAN_RES_OK;
+}
+
 void verwerk_kolom(pman_t* pman, pman_oplossing_t* o, rlo_t* rlo,
                    int li, int ki) {
     char wl[3] = PMAN_NEEM_LETTERS_KOLOM(pman, ki);
@@ -168,6 +182,10 @@ void verwerk_kolom(pman_t* pman, pman_oplossing_t* o, rlo_t* rlo,
     if (!(letter_is_verstrekt(pman, wl[0]) &&
           letter_is_verstrekt(pman, wl[1]))) {
         return zoek_oplossing(pman, o, rlo, li + 1, ki);
+    }
+
+    if (check_linkse_kolom(pman) != PMAN_RES_OK) {
+        return;
     }
 
     int w = neem_waarde(pman, wl[0]) + neem_waarde(pman, wl[1]) +
@@ -192,7 +210,7 @@ void verwerk_kolom(pman_t* pman, pman_oplossing_t* o, rlo_t* rlo,
 
 pman_res_t valideer_eind(pman_t* pman, pman_oplossing_t* o) {
     int eki = pman->handle.lengtes[2] - 1;
-    char wl[3] = PMAN_NEEM_LETTERS_KOLOM(pman, eki);
+    // char wl[3] = PMAN_NEEM_LETTERS_KOLOM(pman, eki);
 
     // Controleer of er geen leading zero's zijn.
     for (int i = 0; i < AANTAL_WOORDEN; i++) {
@@ -209,31 +227,20 @@ pman_res_t valideer_eind(pman_t* pman, pman_oplossing_t* o) {
         return PMAN_RES_ERR;
     }
 
-    // Controlleer of de carry van de meest linkse kolom.
-    int w = (neem_waarde(pman, wl[0]) + neem_waarde(pman, wl[1]) +
-             pman->c[eki]) %
-            pman->handle.grondgetal;
-    if (letter_is_verstrekt(pman, wl[2]) &&
-        w != neem_waarde(pman, wl[2])) {
-        return PMAN_RES_ERR;
-    }
-
-    if (!letter_is_verstrekt(pman, wl[2]) &&
-        waarde_verstrek(pman, wl[2], w) != PMAN_RES_OK) {
-        return PMAN_RES_ERR;
-    }
-
     if (!o->zoek_uniek && o->size == 0) {
         kopieer_oplossing(pman, o);
     }
 
-    waarde_ontdoe(pman, wl[2]);
     return PMAN_RES_OK;
 }
 
 void zoek_oplossing(pman_t* pman, pman_oplossing_t* o, rlo_t* rlo,
                     int li, int ki) {
     char l = pman->letters[li];
+
+    if (o->zoek_uniek && o->oplossingen > 1) {
+        return;
+    }
 
     if (l == LETTER_UNDF) {
         o->oplossingen += (valideer_eind(pman, o) == PMAN_RES_OK);
@@ -266,6 +273,12 @@ pman_res_t pman_init(pman_t* p) {
     // links. Hierdoor is de lijst meteen gesorteed zodat de meest
     // rechtse kolom als eerste kan worden toegekend in
     // zoek_oplossingen.
+    if (max(p->handle.lengtes[0], p->handle.lengtes[1]) <
+        p->handle.lengtes[2]) {
+        p->c[p->handle.lengtes[2]] = 1;
+        waarde_verstrek(
+            p, p->handle.woord[2][p->handle.lengtes[2] - 1], 1);
+    }
 
     for (int wi = 0; wi < AANTAL_WOORDEN; wi++) {
         for (int i = 0; i < p->handle.lengtes[wi]; i++) {
@@ -302,20 +315,10 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
     int acc = 0;
 
     if (li >= lw - 2) {
-        pman_oplossing_t o = {.zoek_uniek = true};
+        pman_oplossing_t o = {.oplossingen = 0, .zoek_uniek = true};
         r->bekeken++;
         p->handle.lengtes[2] = li + 1;
         zoek_oplossing(p, &o, rlo, 0, 0);
-        if (p->handle.woord[2][0] == 'R' &&
-            p->handle.woord[2][1] == 'O' &&
-            p->handle.woord[2][3] == 'E' &&
-            p->handle.woord[2][4] == 'R') {
-            for (int i = 0; i < p->handle.lengtes[2]; i++) {
-                printf("%c", p->handle.woord[2][i]);
-            }
-            printf("\n");
-        }
-
         if (o.oplossingen == 1 && r->size == 0) {
             for (int i = 0; i < p->handle.lengtes[2]; i++) {
                 r->letter[i] = p->handle.woord[2][i];

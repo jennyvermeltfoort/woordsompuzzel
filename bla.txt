@@ -1,0 +1,8 @@
+
+1. Een woordsom-puzzel oplossen
+2. Woordsom-puzzels construeren bij twee gegeven woorden
+3. Stoppen
+
+Maak een keuze: 
+Voer het grondtal van de puzzel in.
+grondtal: Voer de drie woorden van de puzzel in.
