@@ -80,13 +80,23 @@ void doePuzzel() {
     // cin >> nwWoord[1];
     cout << "Woord 2: ";
     // cin >> nwWoord[2];
-    grondtal = 15;
+    grondtal = 26;
+
     nwWoord[0] = "DONALD";
     nwWoord[1] = "GERALD";
     nwWoord[2] = "ROBERT";
+
+    nwWoord[0] = "SEND";
+    nwWoord[1] = "MORE";
+    nwWoord[2] = "MONEY";
+
     nwWoord[0] = "SINT";
     nwWoord[1] = "PIET";
     nwWoord[2] = "RUZIE";
+
+    // nwWoord[0] = "STOOM";
+    // nwWoord[1] = "BOOT";
+    // nwWoord[2] = "PAKJE";
 
     wsp1 = new WoordSomPuzzel(grondtal, nwWoord[0], nwWoord[1],
                               nwWoord[2]);
@@ -164,13 +174,30 @@ void construeerPuzzels() {
 
     cout << "Voer het grondtal van de puzzel in." << endl;
     cout << "grondtal: ";
-    cin >> grondtal;
+    // cin >> grondtal;
     cout << endl;
     cout << "Voer de eerste twee woorden van de puzzel in." << endl;
     cout << "Woord 0: ";
-    cin >> nwWoord[0];
+    // cin >> nwWoord[0];
     cout << "Woord 1: ";
-    cin >> nwWoord[1];
+    // cin >> nwWoord[1];
+
+    grondtal = 10;
+    nwWoord[0] = "SINT";
+    nwWoord[1] = "PIET";
+    nwWoord[2] = "PIET";
+
+    nwWoord[0] = "MIJTER";
+    nwWoord[1] = "MANTEL";
+    nwWoord[2] = "ROBERT";
+
+    nwWoord[0] = "SINT";
+    nwWoord[1] = "PIET";
+    nwWoord[2] = "PIET";
+
+    nwWoord[0] = "DONALD";
+    nwWoord[1] = "GERALD";
+    nwWoord[2] = "ROBERT";
 
     wsp1 = new WoordSomPuzzel(grondtal, nwWoord[0], nwWoord[1],
                               nwWoord[1]);
@@ -211,7 +238,7 @@ void hoofdmenu() {
         cout << endl;
         cout << "Maak een keuze: ";
         // cin >> keuze;
-        keuze = 1;
+        keuze = 2;
         switch (keuze) {
             case 1:
                 doePuzzel();
@@ -219,6 +246,7 @@ void hoofdmenu() {
                 break;
             case 2:
                 construeerPuzzels();
+                return;
                 break;
             case 3:
                 break;

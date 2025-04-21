@@ -62,21 +62,29 @@ bool WoordSomPuzzel::maakLetterVrij(char kar) {
 
 int WoordSomPuzzel::zoekOplossingen(
     long long &deeloplossingen, vector<pair<char, int> > &oplossing) {
-    pman_oplossing_t o = {};
-    int oplossingen = pman_zoek_oplossingen(phandle, &o);
+    pman_oplossing_t o = {0};
+    pman_zoek_oplossingen(phandle, &o);
     deeloplossingen = o.bekeken;
 
     for (int i = 0; i < o.size; i++) {
         oplossing.push_back({o.letter[i], o.waarde[i]});
     }
 
-    return oplossingen;
+    return (o.oplossingen > 0) ? o.oplossingen : -1;
 }  // zoekOplossingen
 
 //*************************************************************************
 
 int WoordSomPuzzel::construeerPuzzels(string &mogelijkWoord2) {
-    return 0;
+    pman_puzzel_t p = {0};
+    int oplossingen = pman_contrueer_puzzels(phandle, &p);
+
+    mogelijkWoord2 = "";
+    for (int i = 0; i < p.size; i++) {
+        mogelijkWoord2 += p.letter[i];
+    }
+
+    return oplossingen;
 }  // construeerPuzzels
 
 //*************************************************************************
