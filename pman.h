@@ -9,6 +9,8 @@
 typedef enum {
     PMAN_RES_OK = 0,
     PMAN_RES_ERR,
+    PMAN_RES_UNK,
+    PMAN_RES_VERSTREKT,
 } pman_res_t;
 
 typedef struct {
@@ -24,7 +26,6 @@ typedef struct {
     int waarde[GRONDGETAL_MAX];
     int size;
     int bekeken;
-    int aantal;
 } pman_oplossing_t;
 
 void pman_destroy(const pman_handle_t *);
