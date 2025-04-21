@@ -56,7 +56,7 @@ char neem_waarde(pman_t* pman, char l) {
 
 // inline
 bool letter_is_verstrekt(pman_t* pman, char l) {
-    return pman->letter_waarde[(int)l] != WAARDE_UNDF;
+    return pman->is_letter_toegekend[(int)l];
 }
 
 typedef struct RLO_KNOOP_T rlo_knoop_t;
@@ -89,6 +89,9 @@ void rlo_init(rlo_t* rlo, int size) {
 
 // inline
 rlo_knoop_t* rlo_pop(rlo_t* rlo) {
+    if (rlo->size < 2) {
+        return rlo->start;
+    }
     rlo_knoop_t* k = rlo->start;
     rlo->start = rlo->start->volgende;
     rlo->eind->volgende = rlo->start;
@@ -101,10 +104,12 @@ rlo_knoop_t* rlo_start(rlo_t* rlo) { return rlo->start; }
 
 // inline
 void rlo_put(rlo_t* rlo, rlo_knoop_t* k) {
-    k->volgende = rlo->start;
-    rlo->eind->volgende = k;
-    rlo->eind = k;
-    rlo->size++;
+    if (k != NULL) {
+        k->volgende = rlo->start;
+        rlo->eind->volgende = k;
+        rlo->eind = k;
+        rlo->size++;
+    }
 }
 
 pman_res_t waarde_verstrek(pman_t* pman, char l, int w) {
@@ -124,7 +129,7 @@ pman_res_t waarde_ontdoe(pman_t* pman, char l) {
         pman->is_letter_toegekend[(int)l] = false;
         pman->is_waarde_toegekend[pman->letter_waarde[(int)l]] =
             false;
-        pman->letter_waarde[(int)l] = WAARDE_UNDF;
+        pman->letter_waarde[(int)l] = 0;
         return PMAN_RES_OK;
     };
     return PMAN_RES_ERR;
@@ -214,53 +219,97 @@ void kopieer_oplossing(pman_t* pman, pman_oplossing_t* o) {
         o->waarde[i] = neem_waarde(pman, l);
         o->size++;
     }
+    o->aantal++;
+}
+
+bool _rlo_put(rlo_t* rlo, rlo_knoop_t* k) {
+    rlo_put(rlo, k);
+    return true;
+}
+
+bool _reset_0(pman_t* pman, pman_handle_t* h, rlo_t* rlo,
+              rlo_knoop_t** k, int ki, char wl0) {
+    if (ki < h->lengtes[0]) {
+        rlo_put(rlo, k[0]);
+        waarde_ontdoe(pman, wl0);
+    }
+    return true;
+}
+
+bool _reset_1(pman_t* pman, pman_handle_t* h, rlo_t* rlo,
+              rlo_knoop_t** k, int ki, char wl1, char wl2) {
+    if (ki < h->lengtes[1]) {
+        rlo_put(rlo, k[1]);
+        waarde_ontdoe(pman, wl1);
+    }
+
+    waarde_ontdoe(pman, wl2);
+    return true;
+}
+
+bool vul_kolom(pman_t* pman, rlo_t* rlo, int ki, int* c,
+               pman_oplossing_t* o) {
+    pman_handle_t* h = &pman->handle;
+    char wl0 = woord_neem_letter(pman, 0, ki);
+    char wl1 = woord_neem_letter(pman, 1, ki);
+    char wl2 = woord_neem_letter(pman, 2, ki);
+    rlo_knoop_t* k[AANTAL_WOORDEN] = {};
+    int s0 = rlo->size;
+
+    if (ki == h->lengtes[2]) {
+        kopieer_oplossing(pman, o);
+        return true;
+    }
+
+    do {
+        if (ki < h->lengtes[0] && wl0 != wl1) {
+            do {
+                waarde_ontdoe(pman, wl0);
+                rlo_put(pman, k[0]);
+                k[0] = rlo_pop(rlo);
+                o->bekeken++;
+            } while (waarde_verstrek(pman, wl0, k[0]) !=
+                         PMAN_RES_OK &&
+                     s0--);
+        }
+
+        int s1 = rlo->size;
+        int w2 = 0;
+        do {
+            waarde_ontdoe(pman, wl2);
+            if (ki < h->lengtes[1]) {
+                do {
+                    waarde_ontdoe(pman, wl1);
+                    rlo_put(pman, k[1]);
+                    k[1] = rlo_pop(rlo);
+                    o->bekeken++;
+                } while (waarde_verstrek(pman, wl1, k[1]) !=
+                             PMAN_RES_OK &&
+                         s1--);
+            }
+
+            w2 = neem_waarde(pman, wl0) + neem_waarde(pman, wl1) +
+                 c[ki];
+            c[ki + 1] = (w2 >= h->grondgetal);
+        } while (!(waarde_verstrek(pman, wl2, w2 % h->grondgetal) ==
+                       PMAN_RES_OK &&
+                   vul_kolom(pman, rlo, ki + 1, c, o) == false) &&
+                 s1--);
+    } while (s0--);
+
+    return true;
 }
 
 int zoek_oplossing(pman_t* pman, rlo_t* rlo, int ul_index,
                    pman_oplossing_t* o) {
-    char l = pman->unieke_letters[ul_index];
     int acc = 0;
+    pman_handle_t* h = &pman->handle;
 
-    o->bekeken += rlo->size;
+    int c[GRONDGETAL_MAX] = {0};
+    int ki = 0;
 
-    if (rlo->size < 2) {
-        rlo_knoop_t* k = rlo_start(rlo);
-        waarde_verstrek(pman, l, k->waarde);
-        c_verstrek(pman, l);
-        char wl0 = woord_neem_letter(pman, 0, 5);
-        char wl1 = woord_neem_letter(pman, 1, 5);
-        char wl2 = woord_neem_letter(pman, 2, 5);
-        // todo make this shit also nicer.
-
-        if (pman->c[6] != 1 && neem_waarde(pman, wl0) != 0 &&
-            neem_waarde(pman, wl1) != 0 &&
-            neem_waarde(pman, wl2) != 0 &&
-            valideer_puzzel(pman, l) == PMAN_RES_OK) {
-            acc++;
-            pman_print(&pman->handle);
-            // for (;;);
-            if (o->size == 0) {
-                kopieer_oplossing(pman, o);
-            }
-        }
-        waarde_ontdoe(pman, l);
-        c_ontdoe(pman, l);
-        return acc;
-    }
-
-    for (int i = rlo->size; i > 0; i--) {
-        rlo_knoop_t* k = rlo_pop(rlo);
-        waarde_verstrek(pman, l, k->waarde);
-        c_verstrek(pman, l);
-        if (valideer_puzzel(pman, l) == PMAN_RES_OK) {
-            acc += zoek_oplossing(pman, rlo, ul_index + 1, o);
-        }
-        waarde_ontdoe(pman, l);
-        c_ontdoe(pman, l);
-        rlo_put(rlo, k);
-    }
-
-    return acc;
+    vul_kolom(pman, rlo, ki, c, o);
+    return o->aantal;
 }
 
 int pman_zoek_oplossingen(const pman_handle_t* const h,
@@ -302,7 +351,7 @@ void pman_print(const pman_handle_t* const h) {
     printf("Toegekende letters:\n");
     for (char i = 'A'; i <= 'Z'; i++) {
         int w = pman->letter_waarde[(int)i];
-        if (w >= 0) {
+        if (pman->is_waarde_toegekend[w]) {
             printf("%c,%i; ", i, pman->letter_waarde[(int)i]);
         }
     }
@@ -314,10 +363,6 @@ pman_res_t pman_init(pman_t* pman) {
         pman->c[i] = WAARDE_UNDF;
     }
     pman->c[0] = 0;
-
-    for (int i = 0; i < AANTAL_LETTERS; i++) {
-        pman->letter_waarde[i] = WAARDE_UNDF;
-    }
 
     for (int i = 0; i < AANTAL_WOORDEN; i++) {
         if (!pman->handle.woord[i][0]) {

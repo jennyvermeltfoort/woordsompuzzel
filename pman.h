@@ -24,6 +24,7 @@ typedef struct {
     int waarde[GRONDGETAL_MAX];
     int size;
     int bekeken;
+    int aantal;
 } pman_oplossing_t;
 
 void pman_destroy(const pman_handle_t *);
