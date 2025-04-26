@@ -1,0 +1,220 @@
+
+
+\documentclass[10pt]{article}
+
+\usepackage[utf8]{inputenc}
+
+ \usepackage[T1]{fontenc}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage[toc,page]{appendix}
+\graphicspath{ {./figuren/} }
+\parindent=0pt
+\usepackage{fancyvrb}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks = true,
+    linkcolor = blue,
+    citecolor=blue,
+    linkbordercolor = {white},
+}
+\usepackage{fullpage}
+\usepackage{fancyvrb}
+
+\frenchspacing
+\usepackage{booktabs}
+\usepackage{microtype}
+
+\usepackage[english,dutch]{babel}
+
+\usepackage{listings}
+% Er zijn talloze parameters ...
+\lstset{
+    belowcaptionskip=1\baselineskip,
+    breaklines=true,
+    columns=flexible,
+    basicstyle=\small\ttfamily,
+}
+\usepackage{graphicx}
+\usepackage{placeins}
+
+\usepackage{mathtools}
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{1pt}%
+
+\title{Opdracht 1, Algoritmiek}
+\author{Jenny Vermeltfoort, s3787494, groep PO1\_20}
+
+\begin{document}
+
+\selectlanguage{dutch}
+\def\tablename{Tabel}
+
+\maketitle
+
+\section{Uitleg}
+
+
+\subsection{Optimale score.}
+
+
+\section{Puzzel oplossingen}
+
+\begin{table}[h]
+    \centering
+    \caption{Resultaten van verschillende puzzels.}
+    \begin{tabular}{@{}ccccc@{}}
+        \toprule
+        Puzzel & Grondgetal & Oplossingen & Bekeken & Tijdsduur \\ 
+        \midrule
+        STOOM+BOOT=PAKJE & 10 & 5      & 1099 & \SI{29}{\micro\second}. \\
+        SINT+PIET=RUZIE & 9 & -1       & 229 & \SI{5}{\micro\second}. \\
+        SINT+PIET=RUZIE & 10 & 16      & 397 & \SI{14}{\micro\second}. \\
+        SINT+PIET=RUZIE & 11 & 64      & 859 & \SI{21}{\micro\second}. \\
+        SINT+PIET=RUZIE & 20 & 11068   & 40482 & \SI{883}{\micro\second}. \\
+        SINT+PIET=RUZIE & 26 & 53590   & 162415 & \SI{3264}{\micro\second}. \\
+        SINT+PIET=RUZIE, N=3, P=21 & 26 & 213 & 733  & \SI{13}{\micro\second}. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+\FloatBarrier
+
+
+\section{Puzzel constructies}
+
+\begin{table}[h]
+    \centering
+    \caption{Resultaten van verschillende constructies.}
+    \begin{tabular}{@{}cccc@{}}
+        \toprule
+        Woorden & Grondgetal & Puzzels & Tijdsduur \\ 
+        \midrule
+        SINT+PIET=... & 10 & 840 & \SI{0.184}{\second}. \\
+        KLAAS+PAARD=... & 10 & 24864 & \SI{6.074}{\second}. \\
+        MIJTER+MANTEL=... & 10 & 461320 & \SI{103.948}{\second}. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+\FloatBarrier
+
+
+
+
+\begin{appendices}
+    \section{Experimenten Logs}
+    \begin{lstlisting}
+
+        De puzzel kent 5 verschillende oplossing(en).
+        Het zoeken van de oplossingen kostte 28 clock ticks, ofwel 2.8e-05 seconden.
+        We hebben daarbij 1099 deeloplossingen bekeken.
+        Een gevonden oplossing is:
+        M=2 T=7 O=5 B=8 S=3 E=9 J=0 K=1 A=6 P=4
+        Grontgetal: 10 
+        Puzzel:
+        0: STOOM
+        1: BOOT
+        2: PAKJE
+        Toegekende letters:
+
+        De puzzel kent -1 verschillende oplossing(en).
+        Het zoeken van de oplossingen kostte 5 clock ticks, ofwel 5e-06 seconden.
+        We hebben daarbij 229 deeloplossingen bekeken.
+        Grontgetal: 9 
+        Puzzel:
+        0: SINT
+        1: PIET
+        2: RUZIE
+        Toegekende letters:
+        R=1; 
+
+        De puzzel kent 16 verschillende oplossing(en).
+        Het zoeken van de oplossingen kostte 14 clock ticks, ofwel 1.4e-05 seconden.
+        We hebben daarbij 397 deeloplossingen bekeken.
+        Een gevonden oplossing is:
+        T=2 N=5 E=4 I=9 S=6 P=3 Z=8 U=0 R=1
+        Grontgetal: 10 
+        Puzzel:
+        0: SINT
+        1: PIET
+        2: RUZIE
+        Toegekende letters:
+        R=1; 
+
+        De puzzel kent 64 verschillende oplossing(en).
+        Het zoeken van de oplossingen kostte 21 clock ticks, ofwel 2.1e-05 seconden.
+        We hebben daarbij 859 deeloplossingen bekeken.
+        Een gevonden oplossing is:
+        T=2 N=6 E=4 I=10 S=7 P=8 Z=9 U=5 R=1
+        Grontgetal: 11 
+        Puzzel:
+        0: SINT
+        1: PIET
+        2: RUZIE
+        Toegekende letters:
+        R=1; 
+
+        De puzzel kent 11068 verschillende oplossing(en).
+        Het zoeken van de oplossingen kostte 883 clock ticks, ofwel 0.000883 seconden.
+        We hebben daarbij 40482 deeloplossingen bekeken.
+        Een gevonden oplossing is:
+        T=2 N=3 E=4 I=7 S=5 P=15 Z=14 U=0 R=1
+        Grontgetal: 20 
+        Puzzel:
+        0: SINT
+        1: PIET
+        2: RUZIE
+        Toegekende letters:
+        R=1; 
+
+        De puzzel kent 53590 verschillende oplossing(en).
+        Het zoeken van de oplossingen kostte 3264 clock ticks, ofwel 0.003264 seconden.
+        We hebben daarbij 162415 deeloplossingen bekeken.
+        Een gevonden oplossing is:
+        T=2 N=3 E=4 I=7 S=5 P=21 Z=14 U=0 R=1
+        Grontgetal: 26 
+        Puzzel:
+        0: SINT
+        1: PIET
+        2: RUZIE
+        Toegekende letters:
+        R=1; 
+
+        De puzzel kent 213 verschillende oplossing(en).
+        Het zoeken van de oplossingen kostte 13 clock ticks, ofwel 1.3e-05 seconden.
+        We hebben daarbij 733 deeloplossingen bekeken.
+        Een gevonden oplossing is:
+        T=2 N=3 E=4 I=7 S=5 P=21 Z=14 U=0 R=1
+        Grontgetal: 26 
+        Puzzel:
+        0: SINT
+        1: PIET
+        2: RUZIE
+        Toegekende letters:
+        N=3; P=21; R=1; 
+
+        # echo "2 10 SINT PIET 3 4 3" | ./WoordSomPuzzel
+        We vonden 840 puzzels met een unieke oplossing.
+        Het construeren van de puzzels kostte 184744 clock ticks, ofwel 0.184744 seconden.
+        Een mogelijk woord 2 met een unieke oplossing: TTNSN
+
+        # echo "2 10 KLAAS PAARD 3 4 3" | ./WoordSomPuzzel
+        We vonden 24864 puzzels met een unieke oplossing.
+        Het construeren van de puzzels kostte 6074723 clock ticks, ofwel 6.07472 seconden.
+        Een mogelijk woord 2 met een unieke oplossing: SSSDDK
+
+        # echo "2 10 MIJTER MANTEL 3 4 3" | ./WoordSomPuzzel 
+        We vonden 461320 puzzels met een unieke oplossing.
+        Het construeren van de puzzels kostte 103947895 clock ticks, ofwel 103.948 seconden.
+        Een mogelijk woord 2 met een unieke oplossing: RRRREIJ
+
+        
+    \end{lstlisting}
+ 
+
+\end{appendices}
+
+\end{document}

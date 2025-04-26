@@ -41,12 +41,13 @@ inline void str_cpy(const char* s1, char* s2, int ss1) {
  */
 typedef struct {
     pman_handle_t handle;
+    char* woord[AANTAL_WOORDEN];
     int letter_waarde[AANTAL_LETTERS];
     bool heeft_letter[AANTAL_LETTERS];
     bool letter_aanpasbaar[AANTAL_LETTERS];
     bool is_letter_verstrekt[AANTAL_LETTERS];
     bool is_waarde_verstrekt[GRONDGETAL_MAX];
-    bool kolom_indice[GRONDGETAL_MAX + 1];
+    int kolom_indice[GRONDGETAL_MAX + 1];
     int letters[GRONDGETAL_MAX + 1];
     int laatste_letter;
     int aantal_letters;
@@ -165,7 +166,7 @@ pman_res_t waarde_ontdoe(pman_t* p, char l) {
     if (letter_is_verstrekt(p, l)) {
         p->is_letter_verstrekt[(int)l] = false;
         p->is_waarde_verstrekt[p->letter_waarde[(int)l]] = false;
-        p->letter_waarde[(int)l] = WAARDE_UNDF;  // waarom?
+        p->letter_waarde[(int)l] = 0;
         return PMAN_RES_OK;
     }
     return PMAN_RES_ERR;
@@ -184,15 +185,13 @@ inline pman_res_t valideer_eind(pman_t* p, pman_oplossing_t* o) {
     int eki = max(p->handle.lengtes[0], p->handle.lengtes[1]) - 1;
 
     // Controleer of er geen leading zero's zijn.
-    for (int i = 0; i < AANTAL_WOORDEN; i++) {
-        char wl = woord_neem_letter(p, i, p->handle.lengtes[i] - 1);
+    for (int wi = 0; wi < AANTAL_WOORDEN; wi++) {
+        char wl = woord_neem_letter(p, wi, p->handle.lengtes[wi] - 1);
         if (neem_waarde(p, wl) == 0) {
             return PMAN_RES_ERR;
         }
     }
 
-    // Carry van de kolom buiten de lengte van het tweede mag niet
-    // 1 zijn.
     bool c = max(p->handle.lengtes[0], p->handle.lengtes[1]) <
              p->handle.lengtes[2];
     if (p->c[eki + 1] != c) {
@@ -202,54 +201,66 @@ inline pman_res_t valideer_eind(pman_t* p, pman_oplossing_t* o) {
     return PMAN_RES_OK;
 }
 
-void zoek_oplossing(pman_t* p, pman_oplossing_t* o, rlo_t* rlo,
-                    int li, int ki) {
-    char wl[3] = PMAN_NEEM_LETTERS_KOLOM(p, ki);
-    char l = p->letters[li];
-    bool fws = false;  // flag waarde verstrekt
-
-    o->bekeken++;
-
-    if (p->kolom_indice[li]) {
-        int w =
-            neem_waarde(p, wl[0]) + neem_waarde(p, wl[1]) + p->c[ki];
-        p->c[ki + 1] = (w >= p->handle.grondgetal);
+inline pman_res_t verwerk_kolommen(pman_t* p, int eki, int* cki,
+                                   bool flg[static GRONDGETAL_MAX]) {
+    while (eki > *cki) {
+        char wl[3] = PMAN_NEEM_LETTERS_KOLOM(p, *cki);
+        int w = neem_waarde(p, wl[0]) + neem_waarde(p, wl[1]) +
+                p->c[*cki];
+        p->c[*cki + 1] = (w >= p->handle.grondgetal);
         w = w % p->handle.grondgetal;
 
         if (waarde_verstrek(p, wl[2], w) == PMAN_RES_OK) {
-            fws = true;
+            flg[*cki] = true;
         } else if (!letter_is_verstrekt(p, wl[2]) ||
                    neem_waarde(p, wl[2]) != w) {
-            return;
+            return PMAN_RES_ERR;
         }
 
-        ki++;
+        *cki += 1;
     }
+    return PMAN_RES_OK;
+}
 
-    if (p->laatste_letter == li) {
-        o->oplossingen += (valideer_eind(p, o) == PMAN_RES_OK);
-        if (o->oplossingen == 1 && o->size == 0) {
-            kopieer_oplossing(p, o);
-        }
-    } else {
-        if (letter_is_verstrekt(p, l)) {
-            zoek_oplossing(p, o, rlo, li + 1, ki);
+void zoek_oplossing(pman_t* p, pman_oplossing_t* o, rlo_t* rlo,
+                    int li, int ki) {
+    char l = p->letters[li];
+    bool flg[GRONDGETAL_MAX] = {0};
+    int oki = ki;
+
+    o->bekeken++;
+
+    if (verwerk_kolommen(p, p->kolom_indice[li], &ki, flg) ==
+        PMAN_RES_OK) {
+        if (p->laatste_letter == li) {
+            o->oplossingen += (valideer_eind(p, o) == PMAN_RES_OK);
+
+            if (o->oplossingen == 1 && o->size == 0) {
+                kopieer_oplossing(p, o);
+            }
         } else {
-            for (int i = rlo->size; i > 0; i--) {
-                knoop_t* k = rlo_neem_voor(rlo);
+            if (letter_is_verstrekt(p, l)) {
+                zoek_oplossing(p, o, rlo, li + 1, ki);
+            } else {
+                for (int i = rlo->size; i > 0; i--) {
+                    knoop_t* k = rlo_neem_voor(rlo);
 
-                if (waarde_verstrek(p, l, k->waarde) == PMAN_RES_OK) {
-                    zoek_oplossing(p, o, rlo, li + 1, ki);
-                    waarde_ontdoe(p, l);
+                    if (waarde_verstrek(p, l, k->waarde) ==
+                        PMAN_RES_OK) {
+                        zoek_oplossing(p, o, rlo, li + 1, ki);
+                        waarde_ontdoe(p, l);
+                    }
+
+                    rlo_geef_eind(rlo, k);
                 }
-
-                rlo_geef_eind(rlo, k);
             }
         }
     }
 
-    if (fws) {
-        waarde_ontdoe(p, wl[2]);
+    while (ki-- > oki) {
+        if (flg[ki]) {
+            waarde_ontdoe(p, woord_neem_letter(p, 2, ki));
+        }
     }
 }
 
@@ -336,11 +347,14 @@ pman_res_t man_init(pman_t* p) {
                 if (w < 'A' || w > 'Z') {
                     return PMAN_RES_ERR;
                 }
+                if (!heeft_letter(p, w)) {
+                    p->kolom_indice[p->aantal_letters] = i;
+                }
                 geef_letter(p, w);
             }
         }
-        p->kolom_indice[p->aantal_letters] = true;
     }
+    p->kolom_indice[p->aantal_letters] = p->handle.lengtes[2];
     p->laatste_letter =
         p->aantal_letters;  // laatste letter om toegekend te worden
                             // in zoek_oplossingen. (Base case)
@@ -350,6 +364,7 @@ pman_res_t man_init(pman_t* p) {
         if (w < 'A' || w > 'Z') {
             return PMAN_RES_ERR;
         }
+
         geef_letter(p, w);
     }
 

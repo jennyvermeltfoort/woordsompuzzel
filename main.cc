@@ -80,7 +80,6 @@ void doePuzzel() {
     cin >> nwWoord[1];
     cout << "Woord 2: ";
     cin >> nwWoord[2];
-    grondtal = 10;
 
     wsp1 = new WoordSomPuzzel(grondtal, nwWoord[0], nwWoord[1],
                               nwWoord[2]);
