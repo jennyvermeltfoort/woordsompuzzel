@@ -1,6 +1,6 @@
 
 
-\documentclass[10pt]{article}
+\documentclass[twocolumn,10pt]{article}
 
 \usepackage[utf8]{inputenc}
 
@@ -13,7 +13,6 @@
 \usepackage{float}
 \usepackage[toc,page]{appendix}
 \graphicspath{ {./figuren/} }
-\parindent=0pt
 \usepackage{fancyvrb}
 \usepackage{hyperref}
 \hypersetup{
@@ -24,6 +23,15 @@
 }
 \usepackage{fullpage}
 \usepackage{fancyvrb}
+\graphicspath{ {./figuren/} }
+
+\geometry{
+    a4paper,
+    left=20mm,
+    right=20mm,
+    top=25mm,
+    bottom=25mm,
+}
 
 \frenchspacing
 \usepackage{booktabs}
@@ -32,7 +40,6 @@
 \usepackage[english,dutch]{babel}
 
 \usepackage{listings}
-% Er zijn talloze parameters ...
 \lstset{
     belowcaptionskip=1\baselineskip,
     breaklines=true,
@@ -42,9 +49,12 @@
 \usepackage{graphicx}
 \usepackage{placeins}
 
+\usepackage{xcolor}
+\usepackage{titlesec}
+\titleformat{\section}[block]{\color{blue}\Large\bfseries\filcenter}{}{1em}{}
+\titleformat{\subsection}[hang]{\bfseries\filcenter}{}{1em}{}
+
 \usepackage{mathtools}
-\setlength{\parskip}{\baselineskip}%
-\setlength{\parindent}{1pt}%
 
 \title{Opdracht 1, Algoritmiek}
 \author{Jenny Vermeltfoort, s3787494, groep PO1\_20}
@@ -56,56 +66,83 @@
 
 \maketitle
 
-\section{Uitleg}
+\section*{Uitleg}
+Cryptarithm is een puzzel waarbij er waardes worden toegekend aan de letters van drie verschillende woorden. Het doel is om een unieke waarde toe te kennen aan elke unieke letter zodat de som van de eerste twee woorden leidt tot de som van het derde woord. Er mogen in deze oplossing geen leading nullen staan. 
+
+Dit document beschrijft de implementatie van een backtracking algoritme om cryptarithmische puzeels op te lossen. De implementatie kan ook bepalen hoeveel unieke puzzels (puzzels met maar 
+\'e\'en oplossing) er geconstrueerd kunnen worden met twee woorden.
+
+\section*{Implementatie}
+
+\subsection*{Zoek oplossing}
+Om zoek\_oplossing voor te bereiden worden er uit alle worden op de volgorde zoals beschreven in de figuur hieronder uit de woorden gehaald. Voor elke letter wordt bijgehouden in welke kolom de letter voor het eerst voorkomt. 
+
+In de zoek\_oplossing implementatie wordt de p->letters[] lijst op volgorde toegekend. De puzzel wordt per kolom ($K0.. K_n$) geverifieerd. Dit wordt gedaan met een achterlopende kolom index. Wanneer bijvoorbeeld de letter 'O' wordt toegekend uit het voorbeeld hieronder zal kolom K0 worden geverifieerd. Dit wordt gedaan door de waarde van E te berekenen, alle waardes hiervoor zijn bekend ($\text{waarde letter woord0} + \text{waarde letter woord1} + \text{carry}_{K0}$). Deze waarde moet niet al toegekend zijn aan een andere letter, en als de letter E als is toegekend dan moet de toegekende waarde hetzelfde zijn als de waarde die is berekend met de waardes uit de kolom. Is dit niet het geval gaat de implementatie een stapje terug. Bij letter 'B' in het voorbeeld worden de kolommen K1 en K2 geverifieerd op dezelfde manier als hierboven voordat B wordt toegekend.
+
+De linkse letter van het het laatste woord kan al bepaald worden wanneer de lengte van dit woord groter is als beide voorgaande woorden. Deze waarde is namelijk \'e\'en en de carry van deze kolom is ook 1.
+
+Wanneer alle waardes zijn toegekend wordt gecontroleerd of er geen leading nullen zijn en of de carry van de laatste kolom niet 0 of 1 is afhankelijk van het lengte verschil van woord2 en woord0/woord1.
+
+Oorspronkelijk had ik een implementatie gemaakt waarbij alle kolommen waar een letter in zitten bij toekenning werden gecontroleerd. Hiervoor werd per kolom gekeken of er genoeg informatie bekend was om de bepalen of de puzzel nog een oplossing heeft (De carry$_{K(n+1)}$ kon al bepaald zijn bijvoorbeeld, hierdoor moeten de waardes van $K_n$ minimaal samen groter dan het grondgetal zijn. Of heel simpel voor alle toegekende kolommen de som van het derde woord berekenen en kijken of dit nog beschikbaar is.) Hierdoor werd de tijdcomplexiteit minder, echter werdt de logica per iteratie aanzienlijk cpu-cycle zwaar (veel branching en weining ruimtelijke localiteit voor caching, daarbij een hogere cache miss rate) wat leidde tot langere iteratie tijden. Er was hier waarschijnlijk nog wel wat optimalisatie te winnen, echter ben ik persoonlijk tevreden met de huidige implementatie.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\columnwidth]{letter.png}
+        \caption{Sorteer orde.}
+    \end{figure}
+    \hfill
 
 
-\subsection{Optimale score.}
+\subsection*{Construeer puzzel}
 
 
-\section{Puzzel oplossingen}
+
+\section*{Puzzel oplossingen}
 
 \begin{table}[h]
     \centering
     \caption{Resultaten van verschillende puzzels.}
-    \begin{tabular}{@{}ccccc@{}}
-        \toprule
-        Puzzel & Grondgetal & Oplossingen & Bekeken & Tijdsduur \\ 
-        \midrule
-        STOOM+BOOT=PAKJE & 10 & 5      & 1099 & \SI{29}{\micro\second}. \\
-        SINT+PIET=RUZIE & 9 & -1       & 229 & \SI{5}{\micro\second}. \\
-        SINT+PIET=RUZIE & 10 & 16      & 397 & \SI{14}{\micro\second}. \\
-        SINT+PIET=RUZIE & 11 & 64      & 859 & \SI{21}{\micro\second}. \\
-        SINT+PIET=RUZIE & 20 & 11068   & 40482 & \SI{883}{\micro\second}. \\
-        SINT+PIET=RUZIE & 26 & 53590   & 162415 & \SI{3264}{\micro\second}. \\
-        SINT+PIET=RUZIE, N=3, P=21 & 26 & 213 & 733  & \SI{13}{\micro\second}. \\
-        \bottomrule
-    \end{tabular}
+    \resizebox{\columnwidth}{!}{ % Verklein de tabel naar de kolombreedte
+        \begin{tabular}{@{}ccccc@{}}
+            \toprule
+            Puzzel & Grondgetal & Oplossingen & Bekeken & Tijdsduur \\ 
+            \midrule
+            STOOM+BOOT=PAKJE & 10 & 5      & 1099 & \SI{29}{\micro\second} \\
+            SINT+PIET=RUZIE & 9 & -1       & 229 & \SI{5}{\micro\second} \\
+            SINT+PIET=RUZIE & 10 & 16      & 397 & \SI{14}{\micro\second} \\
+            SINT+PIET=RUZIE & 11 & 64      & 859 & \SI{21}{\micro\second} \\
+            SINT+PIET=RUZIE & 20 & 11068   & 40482 & \SI{883}{\micro\second} \\
+            SINT+PIET=RUZIE & 26 & 53590   & 162415 & \SI{3264}{\micro\second} \\
+            SINT+PIET=RUZIE, N=3, P=21 & 26 & 213 & 733  & \SI{13}{\micro\second} \\
+            \bottomrule
+        \end{tabular}
+    }
 \end{table}
 \FloatBarrier
 
-
-\section{Puzzel constructies}
+\section*{Puzzel constructies}
 
 \begin{table}[h]
     \centering
     \caption{Resultaten van verschillende constructies.}
-    \begin{tabular}{@{}cccc@{}}
-        \toprule
-        Woorden & Grondgetal & Puzzels & Tijdsduur \\ 
-        \midrule
-        SINT+PIET=... & 10 & 840 & \SI{0.184}{\second}. \\
-        KLAAS+PAARD=... & 10 & 24864 & \SI{6.074}{\second}. \\
-        MIJTER+MANTEL=... & 10 & 461320 & \SI{103.948}{\second}. \\
-        \bottomrule
-    \end{tabular}
+    \resizebox{\columnwidth}{!}{ % Verklein de tabel naar de kolombreedte
+        \begin{tabular}{@{}cccc@{}}
+            \toprule
+            Woorden & Grondgetal & Puzzels & Tijdsduur \\ 
+            \midrule
+            SINT+PIET=... & 10 & 840 & \SI{0.184}{\second} \\
+            KLAAS+PAARD=... & 10 & 24864 & \SI{6.074}{\second} \\
+            MIJTER+MANTEL=... & 10 & 461320 & \SI{103.948}{\second} \\
+            \bottomrule
+        \end{tabular}
+    }
 \end{table}
 \FloatBarrier
 
 
 
-
 \begin{appendices}
-    \section{Experimenten Logs}
+    \section*{Experimenten Logs}
     \begin{lstlisting}
 
         De puzzel kent 5 verschillende oplossing(en).

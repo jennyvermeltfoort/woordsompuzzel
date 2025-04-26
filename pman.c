@@ -47,7 +47,7 @@ typedef struct {
     bool letter_aanpasbaar[AANTAL_LETTERS];
     bool is_letter_verstrekt[AANTAL_LETTERS];
     bool is_waarde_verstrekt[GRONDGETAL_MAX];
-    int kolom_indice[GRONDGETAL_MAX + 1];
+    int kolom[GRONDGETAL_MAX + 1];
     int letters[GRONDGETAL_MAX + 1];
     int laatste_letter;
     int aantal_letters;
@@ -98,7 +98,7 @@ struct KNOOP_T {
 
 /**
  * @brief Simpele FIFO implementatie. Gebruikt a[] als opslag medium,
- * denkende aan memory localization.
+ * denk aan ruimtelijke localiteit.
  */
 typedef struct {
     knoop_t a[GRONDGETAL_MAX];
@@ -230,8 +230,7 @@ void zoek_oplossing(pman_t* p, pman_oplossing_t* o, rlo_t* rlo,
 
     o->bekeken++;
 
-    if (verwerk_kolommen(p, p->kolom_indice[li], &ki, flg) ==
-        PMAN_RES_OK) {
+    if (verwerk_kolommen(p, p->kolom[li], &ki, flg) == PMAN_RES_OK) {
         if (p->laatste_letter == li) {
             o->oplossingen += (valideer_eind(p, o) == PMAN_RES_OK);
 
@@ -348,13 +347,13 @@ pman_res_t man_init(pman_t* p) {
                     return PMAN_RES_ERR;
                 }
                 if (!heeft_letter(p, w)) {
-                    p->kolom_indice[p->aantal_letters] = i;
+                    p->kolom[p->aantal_letters] = i;
                 }
                 geef_letter(p, w);
             }
         }
     }
-    p->kolom_indice[p->aantal_letters] = p->handle.lengtes[2];
+    p->kolom[p->aantal_letters] = p->handle.lengtes[2];
     p->laatste_letter =
         p->aantal_letters;  // laatste letter om toegekend te worden
                             // in zoek_oplossingen. (Base case)
