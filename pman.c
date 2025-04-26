@@ -46,7 +46,6 @@ typedef struct {
     int letters[GRONDGETAL_MAX + 1];
     bool ki[GRONDGETAL_MAX + 1];
     int laatste_letter;
-    bool ei[GRONDGETAL_MAX + 1];
     int aantal_letters;
     int c[GRONDGETAL_MAX];
 } pman_t;  // puzzel manager.
@@ -302,20 +301,29 @@ void pman_zoek_oplossingen(const pman_handle_t* const h,
 }
 
 int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
-                       int lw, int li) {
+                       int lw, int li, int uc, int mi, int mu) {
     int acc = 0;
 
     if (li >= lw - 1) {
         pman_oplossing_t o = {.oplossingen = 0, .zoek_uniek = true};
 
         p->handle.lengtes[2] = li;
-        waarde_ontdoe(p, p->handle.woord[2][0]);
         if (max(p->handle.lengtes[0], p->handle.lengtes[1]) <
             p->handle.lengtes[2]) {
             waarde_verstrek(p, p->handle.woord[2][0], 1);
         }
 
         zoek_oplossing(p, &o, rlo, 0, 0);
+
+        waarde_ontdoe(p, p->handle.woord[2][0]);
+
+        if (o.oplossingen == 1 && li == lw - 1) {
+            zoek_oplossing(p, &o, rlo, 0, 0);
+            for (int i = 0; i < li; i++) {
+                printf("%c", p->handle.woord[2][i]);
+            }
+            printf("\n");
+        }
 
         if (o.oplossingen == 1 && r->size == 0) {
             for (int i = 0; i < p->handle.lengtes[2]; i++) {
@@ -332,9 +340,21 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
         return acc;
     }
 
-    for (int i = 0; i < p->aantal_letters; i++) {
+    for (int i = 0; i < p->aantal_letters - mu; i++) {
+        if (i >= mi) {
+            i += mu;
+            mu += 1;
+        }
         p->handle.woord[2][li] = p->letters[i];
-        acc += construeer_puzzels(p, r, rlo, lw, li + 1);
+        if (p->handle.woord[0][li] == p->handle.woord[1][li] &&
+            p->handle.woord[1][li] == p->handle.woord[2][li]) {
+            if (uc == 1) {
+                continue;
+            }
+            uc += 1;
+        }
+
+        acc += construeer_puzzels(p, r, rlo, lw, li + 1, uc, mi, mu);
     }
 
     return acc;
@@ -348,7 +368,9 @@ int pman_contrueer_puzzels(const pman_handle_t* const h,
 
     memcpy(&p.handle, &pman->handle, sizeof(p.handle));
     pman_init(&p);
+    waarde_ontdoe(&p, p.handle.woord[2][0]);
 
+    int mi = p.aantal_letters;
     int mu = p.handle.grondgetal - p.aantal_letters;
     int b = 'A' - 1;
     for (int i = 0; i < mu; i++) {
@@ -359,7 +381,7 @@ int pman_contrueer_puzzels(const pman_handle_t* const h,
     rlo_init(&rlo, p.handle.grondgetal);
     int lw = max(p.handle.lengtes[0], p.handle.lengtes[1]) + 1;
 
-    int acc = construeer_puzzels(&p, r, &rlo, lw, 0);
+    int acc = construeer_puzzels(&p, r, &rlo, lw, 0, 0, mi, 0);
     return (acc > 0) ? acc : -1;
 }
 

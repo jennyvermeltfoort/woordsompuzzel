@@ -108,7 +108,7 @@ void doePuzzel() {
 
     nwWoord[0] = "DONALD";
     nwWoord[1] = "GERALD";
-    nwWoord[2] = "DDDLON";
+    nwWoord[2] = "RGRBAO";
 
     wsp1 = new WoordSomPuzzel(grondtal, nwWoord[0], nwWoord[1],
                               nwWoord[2]);
@@ -196,10 +196,6 @@ void construeerPuzzels() {
 
     grondtal = 10;
 
-    nwWoord[0] = "KLAAS";
-    nwWoord[1] = "PAARD";
-    nwWoord[2] = "BAARD";
-
     nwWoord[0] = "MIJTER";
     nwWoord[1] = "MANTEL";
     nwWoord[2] = "ROBERT";
@@ -207,6 +203,14 @@ void construeerPuzzels() {
     nwWoord[0] = "SINT";
     nwWoord[1] = "PIET";
     nwWoord[2] = "PIET";
+
+    nwWoord[0] = "KLAAS";
+    nwWoord[1] = "PAARD";
+    nwWoord[2] = "BAARD";
+
+    nwWoord[0] = "MIJTER";
+    nwWoord[1] = "MANTEL";
+    nwWoord[2] = "PANTER";
 
     nwWoord[0] = "DONALD";
     nwWoord[1] = "GERALD";
