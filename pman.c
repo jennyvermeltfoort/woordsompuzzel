@@ -25,13 +25,10 @@
             woord_neem_letter(_pman, 2, _ki), \
     }
 
-// inline
-int min(int a, int b) { return (a < b) ? a : b; }
-// inline
-int max(int a, int b) { return (a > b) ? a : b; }
+inline int min(int a, int b) { return (a < b) ? a : b; }
+inline int max(int a, int b) { return (a > b) ? a : b; }
 
-// inline
-void str_cpy(const char* s1, char* s2, int ss1) {
+inline void str_cpy(const char* s1, char* s2, int ss1) {
     while (ss1--) {
         *s2++ = *s1++;
     }
@@ -56,38 +53,31 @@ typedef struct {
     int c[GRONDGETAL_MAX];
 } pman_t;
 
-// inline
-char woord_neem_letter(pman_t* p, int wi, int li) {
+inline char woord_neem_letter(pman_t* p, int wi, int li) {
     return p->handle.woord[wi][p->handle.lengtes[wi] - 1 - li];
 }
 
-// inline
-char neem_waarde(pman_t* p, char l) {
+inline char neem_waarde(pman_t* p, char l) {
     return p->letter_waarde[(int)l];
 }
 
-// inline
-bool letter_is_verstrekt(pman_t* p, char l) {
+inline bool letter_is_verstrekt(pman_t* p, char l) {
     return p->is_letter_verstrekt[(int)l];
 }
 
-// inline
-bool waarde_is_verstrekt(pman_t* p, int w) {
+inline bool waarde_is_verstrekt(pman_t* p, int w) {
     return p->is_waarde_verstrekt[w];
 }
 
-// inline
-bool heeft_letter(pman_t* p, char l) {
+inline bool heeft_letter(pman_t* p, char l) {
     return p->heeft_letter[(int)l];
 }
 
-// inline
-bool letter_is_aanpasbaar(pman_t* p, char l) {
+inline bool letter_is_aanpasbaar(pman_t* p, char l) {
     return p->letter_aanpasbaar[(int)l];
 }
 
-// inline
-void geef_letter(pman_t* p, char l) {
+inline void geef_letter(pman_t* p, char l) {
     if (!heeft_letter(p, l) && !letter_is_verstrekt(p, l)) {
         p->heeft_letter[(int)l] = true;
         p->letter_aanpasbaar[(int)l] = true;
@@ -185,8 +175,7 @@ void kopieer_oplossing(pman_t* p, pman_oplossing_t* o) {
     }
 }
 
-// inline
-pman_res_t valideer_eind(pman_t* p, pman_oplossing_t* o) {
+inline pman_res_t valideer_eind(pman_t* p, pman_oplossing_t* o) {
     int eki = max(p->handle.lengtes[0], p->handle.lengtes[1]) - 1;
 
     // Controleer of er geen leading zero's zijn.
