@@ -86,10 +86,6 @@ void doePuzzel() {
     nwWoord[1] = "MORE";
     nwWoord[2] = "MONEY";
 
-    nwWoord[0] = "SINT";
-    nwWoord[1] = "PIET";
-    nwWoord[2] = "RUZIE";
-
     // nwWoord[0] = "STOOM";
     // nwWoord[1] = "BOOT";
     // nwWoord[2] = "PAKJE";
@@ -98,13 +94,21 @@ void doePuzzel() {
     nwWoord[1] = "PIET";
     nwWoord[2] = "NTSB";
 
+    nwWoord[0] = "MIJTER";
+    nwWoord[1] = "MANTEL";
+    nwWoord[2] = "PANTER";
+
     nwWoord[0] = "DONALD";
     nwWoord[1] = "GERALD";
     nwWoord[2] = "ROBERT";
 
-    nwWoord[0] = "MIJTER";
-    nwWoord[1] = "MANTEL";
-    nwWoord[2] = "PANTER";
+    nwWoord[0] = "SINT";
+    nwWoord[1] = "PIET";
+    nwWoord[2] = "RUZIE";
+
+    nwWoord[0] = "DONALD";
+    nwWoord[1] = "GERALD";
+    nwWoord[2] = "DDDLON";
 
     wsp1 = new WoordSomPuzzel(grondtal, nwWoord[0], nwWoord[1],
                               nwWoord[2]);
@@ -192,19 +196,20 @@ void construeerPuzzels() {
 
     grondtal = 10;
 
+    nwWoord[0] = "KLAAS";
+    nwWoord[1] = "PAARD";
+    nwWoord[2] = "BAARD";
+
+    nwWoord[0] = "MIJTER";
+    nwWoord[1] = "MANTEL";
+    nwWoord[2] = "ROBERT";
+
     nwWoord[0] = "SINT";
     nwWoord[1] = "PIET";
     nwWoord[2] = "PIET";
 
     nwWoord[0] = "DONALD";
     nwWoord[1] = "GERALD";
-    nwWoord[2] = "ROBERT";
-
-    nwWoord[0] = "SINT";
-    nwWoord[1] = "PIET";
-    nwWoord[2] = "PIET";
-    nwWoord[0] = "MIJTER";
-    nwWoord[1] = "MANTEL";
     nwWoord[2] = "ROBERT";
 
     wsp1 = new WoordSomPuzzel(grondtal, nwWoord[0], nwWoord[1],
