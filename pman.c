@@ -120,6 +120,15 @@ rlo_knoop_t* rlo_neem_voor(rlo_t* rlo) {
     return k;
 }
 
+rlo_knoop_t* rlo_neem(rlo_t* rlo, int waarde) {
+    rlo_knoop_t* k = rlo_neem_voor(rlo);
+    while (k->waarde != waarde) {
+        rlo_geef_eind(rlo, k);
+        k = rlo_neem_voor(rlo);
+    }
+    return k;
+}
+
 void rlo_geef_eind(rlo_t* rlo, rlo_knoop_t* k) {
     k->volgende = rlo->start;
     rlo->eind->volgende = k;
