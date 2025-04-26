@@ -1,6 +1,6 @@
 CC = g++
 
-CompileParms = -c -g -Wall -std=c++11 
+CompileParms = -c -g -O2  -Wall -std=c++11 
 
 OBJS =  standaard.o woordsompuzzel.o main.o pman.o
 

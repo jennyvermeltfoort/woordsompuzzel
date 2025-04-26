@@ -108,7 +108,7 @@ class WoordSomPuzzel {
     int construeerPuzzels(string &mogelijkWoord2);
 
    private:
-    const pman_handle_t *phandle;  // puzzel manager
+    const pman_handle_t *phandle;  // puzzel handle
 };
 
 #endif
