@@ -131,15 +131,20 @@ void rlo_init(rlo_t* rlo, int size) {
 
 knoop_t* rlo_neem_voor(rlo_t* rlo) {
     knoop_t* k = rlo->start;
-    if (rlo->size > 1) {
-        rlo->start = rlo->start->volgende;
-        rlo->eind->volgende = rlo->start;
-    }
+    rlo->start = rlo->start->volgende;
+    rlo->eind->volgende = rlo->start;
     rlo->size--;
+    if (rlo->size == 0) {
+        rlo->start = NULL;
+    }
     return k;
 }
 
 void rlo_geef_eind(rlo_t* rlo, knoop_t* k) {
+    if (rlo->start == NULL) {
+        rlo->start = k;
+        rlo->eind = k;
+    }
     k->volgende = rlo->start;
     rlo->eind->volgende = k;
     rlo->eind = k;
@@ -264,10 +269,6 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
         zoek_oplossing(p, &o, rlo, 0, 0);
 
         waarde_ontdoe(p, p->handle.woord[2][0]);
-
-        if (o.oplossingen == 1) {
-            printf("%s\n", p->handle.woord[2]);
-        }
 
         if (o.oplossingen == 1 && r->size == 0) {
             for (int i = 0; i < p->handle.lengtes[2]; i++) {
