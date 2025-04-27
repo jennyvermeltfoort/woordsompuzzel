@@ -20,9 +20,9 @@
     })
 #define PMAN_NEEM_LETTERS_KOLOM(_pman, _ki)   \
     {                                         \
-        woord_neem_letter(_pman, 0, _ki),     \
-            woord_neem_letter(_pman, 1, _ki), \
-            woord_neem_letter(_pman, 2, _ki), \
+        woord_lees_letter(_pman, 0, _ki),     \
+            woord_lees_letter(_pman, 1, _ki), \
+            woord_lees_letter(_pman, 2, _ki), \
     }
 
 inline int min(int a, int b) { return (a < b) ? a : b; }
@@ -41,7 +41,6 @@ inline void str_cpy(const char* s1, char* s2, int ss1) {
  */
 typedef struct {
     pman_handle_t handle;
-    char* woord[AANTAL_WOORDEN];
     int letter_waarde[AANTAL_LETTERS];
     bool heeft_letter[AANTAL_LETTERS];
     bool letter_aanpasbaar[AANTAL_LETTERS];
@@ -54,7 +53,7 @@ typedef struct {
     int c[GRONDGETAL_MAX];
 } pman_t;
 
-inline char woord_neem_letter(pman_t* p, int wi, int li) {
+inline char woord_lees_letter(pman_t* p, int wi, int li) {
     return p->handle.woord[wi][p->handle.lengtes[wi] - 1 - li];
 }
 
@@ -186,7 +185,7 @@ inline pman_res_t valideer_eind(pman_t* p, pman_oplossing_t* o) {
 
     // Controleer of er geen leading zero's zijn.
     for (int wi = 0; wi < AANTAL_WOORDEN; wi++) {
-        char wl = woord_neem_letter(p, wi, p->handle.lengtes[wi] - 1);
+        char wl = woord_lees_letter(p, wi, p->handle.lengtes[wi] - 1);
         if (neem_waarde(p, wl) == 0) {
             return PMAN_RES_ERR;
         }
@@ -230,11 +229,16 @@ void zoek_oplossing(pman_t* p, pman_oplossing_t* o, rlo_t* rlo,
 
     o->bekeken++;
 
+    if (o->zoek_uniek && o->oplossingen > 1) {
+        return;
+    }
+
     if (verwerk_kolommen(p, p->kolom[li], &ki, flg) == PMAN_RES_OK) {
         if (p->laatste_letter == li) {
             o->oplossingen += (valideer_eind(p, o) == PMAN_RES_OK);
 
-            if (o->oplossingen == 1 && o->size == 0) {
+            if (!o->zoek_uniek && o->oplossingen == 1 &&
+                o->size == 0) {
                 kopieer_oplossing(p, o);
             }
         } else {
@@ -258,7 +262,7 @@ void zoek_oplossing(pman_t* p, pman_oplossing_t* o, rlo_t* rlo,
 
     while (ki-- > oki) {
         if (flg[ki]) {
-            waarde_ontdoe(p, woord_neem_letter(p, 2, ki));
+            waarde_ontdoe(p, woord_lees_letter(p, 2, ki));
         }
     }
 }
@@ -268,7 +272,7 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
     int acc = 0;
 
     if (li >= lw - 1) {
-        pman_oplossing_t o = {0};
+        pman_oplossing_t o = {.oplossingen = 0, .zoek_uniek = true};
 
         p->handle.lengtes[2] = li;
         if (max(p->handle.lengtes[0], p->handle.lengtes[1]) <
@@ -295,45 +299,26 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
         return acc;
     }
 
-    for (int i = 0; i < p->aantal_letters - avl; i++) {
+    int s = min(avli + avl, p->aantal_letters);
+    for (int i = 0; i < s; i++) {
+        int _aek = aek;
+        int _avl = avl;
+
         p->handle.woord[2][li] = p->letters[i];
 
-        // avl -> aantal vrije letters (i.e. het aantal letters die
-        // niet in woord[0] of woord[1] zitten.) Deze kunnen namelijk
-        // geskipped worden wanneer er een puzzel geconstrueerd word
-        // met een bepaalde structuur van deze vrije letters
-        // (DONALD+GERALD=ROBERT/ROTERB, hier zijn B en T vrij en zijn
-        // ROBERT en ROTERB equivilent). Dit gebeurd hier, aan het
-        // eind van p->letters[] zitten deze vrije letters (vanaf
-        // avli (aantal vrije letters index)), en met avl wordt het
-        // aantal vrije letters afgenomen in volgende iteratie.
         if (i >= avli) {
-            i += avl;
-            avl += 1;
+            _avl++;
         }
 
-        // Er mag maar 1 kolom zijn met dezelfde drie letters.
-        // Skip dus wanneer er meer dan 1 equivalente kolommen
-        // bestaan, voor deze puzzel bestaat namelijk geen oplossing.
-        // aek -> aantal equivilente kolommen.
-        if (p->handle.woord[0][li] == p->handle.woord[1][li] &&
-            p->handle.woord[1][li] == p->handle.woord[2][li]) {
-            if (aek == 1) {
-                continue;
-            }
-            aek += 1;
-        }
-
-        acc +=
-            construeer_puzzels(p, r, rlo, lw, li + 1, aek, avli, avl);
-
+        acc += construeer_puzzels(p, r, rlo, lw, li + 1, _aek, avli,
+                                  _avl);
         p->handle.woord[2][li] = '\0';
     }
 
     return acc;
 }
 
-pman_res_t man_init(pman_t* p) {
+pman_res_t man_init_oplosser(pman_t* p) {
     // Bouw een lijst met daarin alle unieke letters. Deze wordt
     // opgebouwd van rechts boven naar beneden, dit zigzaggend naar
     // links. Hierdoor is de lijst meteen gesorteed zodat de meest
@@ -342,7 +327,7 @@ pman_res_t man_init(pman_t* p) {
     for (int i = 0; i < p->handle.lengtes[2]; i++) {
         for (int wi = 0; wi < AANTAL_WOORDEN - 1; wi++) {
             if (i < p->handle.lengtes[wi]) {
-                char w = woord_neem_letter(p, wi, i);
+                char w = woord_lees_letter(p, wi, i);
                 if (w < 'A' || w > 'Z') {
                     return PMAN_RES_ERR;
                 }
@@ -357,9 +342,16 @@ pman_res_t man_init(pman_t* p) {
     p->laatste_letter =
         p->aantal_letters;  // laatste letter om toegekend te worden
                             // in zoek_oplossingen. (Base case)
+    return PMAN_RES_OK;
+}
+
+pman_res_t man_init(pman_t* p) {
+    if (man_init_oplosser(p) != PMAN_RES_OK) {
+        return PMAN_RES_ERR;
+    }
 
     for (int i = 0; i < p->handle.lengtes[2]; i++) {
-        char w = woord_neem_letter(p, 2, i);
+        char w = woord_lees_letter(p, 2, i);
         if (w < 'A' || w > 'Z') {
             return PMAN_RES_ERR;
         }
@@ -404,8 +396,7 @@ int pman_contrueer_puzzels(const pman_handle_t* const h,
     rlo_t rlo = {};
 
     memcpy(&p.handle, &pi->handle, sizeof(p.handle));
-    man_init(&p);
-    waarde_ontdoe(&p, p.handle.woord[2][0]);
+    man_init_oplosser(&p);
 
     // Append de lijst van letters met "vrije letters", zie
     // construeer_puzzels voor meer info.
@@ -420,7 +411,7 @@ int pman_contrueer_puzzels(const pman_handle_t* const h,
     rlo_init(&rlo, p.handle.grondgetal);
     int lw = max(p.handle.lengtes[0], p.handle.lengtes[1]) + 1;
 
-    int acc = construeer_puzzels(&p, r, &rlo, lw, 0, 0, avli, 0);
+    int acc = construeer_puzzels(&p, r, &rlo, lw, 0, 0, avli, 1);
     return (acc > 0) ? acc : -1;
 }
 

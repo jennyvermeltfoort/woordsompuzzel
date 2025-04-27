@@ -72,9 +72,8 @@ Cryptarithm is een puzzel waarbij er waardes worden toegekend aan de letters van
 Dit document beschrijft de implementatie van een backtracking algoritme om cryptarithmische puzeels op te lossen. De implementatie kan ook bepalen hoeveel unieke puzzels (puzzels met maar 
 \'e\'en oplossing) er geconstrueerd kunnen worden met twee woorden.
 
-\section*{Implementatie}
 
-\subsection*{Zoek oplossing}
+\section*{Zoek oplossing}
 Om zoek\_oplossing voor te bereiden worden er uit alle worden op de volgorde zoals beschreven in de figuur hieronder uit de woorden gehaald. Voor elke letter wordt bijgehouden in welke kolom de letter voor het eerst voorkomt. 
 
 In de zoek\_oplossing implementatie wordt de p->letters[] lijst op volgorde toegekend. De puzzel wordt per kolom ($K0.. K_n$) geverifieerd. Dit wordt gedaan met een achterlopende kolom index. Wanneer bijvoorbeeld de letter 'O' wordt toegekend uit het voorbeeld hieronder zal kolom K0 worden geverifieerd. Dit wordt gedaan door de waarde van E te berekenen, alle waardes hiervoor zijn bekend ($\text{waarde letter woord0} + \text{waarde letter woord1} + \text{carry}_{K0}$). Deze waarde moet niet al toegekend zijn aan een andere letter, en als de letter E als is toegekend dan moet de toegekende waarde hetzelfde zijn als de waarde die is berekend met de waardes uit de kolom. Is dit niet het geval gaat de implementatie een stapje terug. Bij letter 'B' in het voorbeeld worden de kolommen K1 en K2 geverifieerd op dezelfde manier als hierboven voordat B wordt toegekend.
@@ -93,11 +92,7 @@ Oorspronkelijk had ik een implementatie gemaakt waarbij alle kolommen waar een l
     \hfill
 
 
-\subsection*{Construeer puzzel}
-
-
-
-\section*{Puzzel oplossingen}
+\subsection*{Oplossingen}
 
 \begin{table}[h]
     \centering
@@ -120,6 +115,8 @@ Oorspronkelijk had ik een implementatie gemaakt waarbij alle kolommen waar een l
 \end{table}
 \FloatBarrier
 
+\section*{Construeer puzzel}
+
 \section*{Puzzel constructies}
 
 \begin{table}[h]
@@ -130,15 +127,14 @@ Oorspronkelijk had ik een implementatie gemaakt waarbij alle kolommen waar een l
             \toprule
             Woorden & Grondgetal & Puzzels & Tijdsduur \\ 
             \midrule
-            SINT+PIET=... & 10 & 840 & \SI{0.184}{\second} \\
-            KLAAS+PAARD=... & 10 & 24864 & \SI{6.074}{\second} \\
-            MIJTER+MANTEL=... & 10 & 461320 & \SI{103.948}{\second} \\
+            SINT+PIET=... & 10 & 752 & \SI{0.088}{\second} \\
+            KLAAS+PAARD=... & 10 & 20692 & \SI{4.386}{\second} \\
+            MIJTER+MANTEL=... & 10 & 546580 & \SI{118.273}{\second} \\
             \bottomrule
         \end{tabular}
     }
 \end{table}
 \FloatBarrier
-
 
 
 \begin{appendices}
@@ -233,19 +229,19 @@ Oorspronkelijk had ik een implementatie gemaakt waarbij alle kolommen waar een l
         Toegekende letters:
         N=3; P=21; R=1; 
 
-        # echo "2 10 SINT PIET 3 4 3" | ./WoordSomPuzzel
-        We vonden 840 puzzels met een unieke oplossing.
-        Het construeren van de puzzels kostte 184744 clock ticks, ofwel 0.184744 seconden.
+        # echo "2 10 SINT PIET 3" | ./WoordSomPuzzel
+        We vonden 752 puzzels met een unieke oplossing.
+        Het construeren van de puzzels kostte 88909 clock ticks, ofwel 0.088909 seconden.
         Een mogelijk woord 2 met een unieke oplossing: TTNSN
 
-        # echo "2 10 KLAAS PAARD 3 4 3" | ./WoordSomPuzzel
-        We vonden 24864 puzzels met een unieke oplossing.
-        Het construeren van de puzzels kostte 6074723 clock ticks, ofwel 6.07472 seconden.
+        # echo "2 10 KLAAS PAARD 3" | ./WoordSomPuzzel
+        We vonden 20692 puzzels met een unieke oplossing.
+        Het construeren van de puzzels kostte 4386231 clock ticks, ofwel 4.38623 seconden.
         Een mogelijk woord 2 met een unieke oplossing: SSSDDK
 
-        # echo "2 10 MIJTER MANTEL 3 4 3" | ./WoordSomPuzzel 
-        We vonden 461320 puzzels met een unieke oplossing.
-        Het construeren van de puzzels kostte 103947895 clock ticks, ofwel 103.948 seconden.
+        # echo "2 10 MIJTER MANTEL 3" | ./WoordSomPuzzel
+        We vonden 550024 puzzels met een unieke oplossing.
+        Het construeren van de puzzels kostte 120247341 clock ticks, ofwel 120.247 seconden.
         Een mogelijk woord 2 met een unieke oplossing: RRRREIJ
 
         
