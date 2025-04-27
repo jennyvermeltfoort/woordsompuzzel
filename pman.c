@@ -268,7 +268,7 @@ void zoek_oplossing(pman_t* p, pman_oplossing_t* o, rlo_t* rlo,
 }
 
 int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
-                       int lw, int li, int aek, int avli, int avl) {
+                       int lw, int li, int avli, int avl) {
     int acc = 0;
 
     if (li >= lw - 1) {
@@ -301,17 +301,14 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
 
     int s = min(avli + avl, p->aantal_letters);
     for (int i = 0; i < s; i++) {
-        int _aek = aek;
         int _avl = avl;
-
-        p->handle.woord[2][li] = p->letters[i];
-
         if (i >= avli) {
             _avl++;
         }
 
-        acc += construeer_puzzels(p, r, rlo, lw, li + 1, _aek, avli,
-                                  _avl);
+        p->handle.woord[2][li] = p->letters[i];
+
+        acc += construeer_puzzels(p, r, rlo, lw, li + 1, avli, _avl);
         p->handle.woord[2][li] = '\0';
     }
 
@@ -411,7 +408,7 @@ int pman_contrueer_puzzels(const pman_handle_t* const h,
     rlo_init(&rlo, p.handle.grondgetal);
     int lw = max(p.handle.lengtes[0], p.handle.lengtes[1]) + 1;
 
-    int acc = construeer_puzzels(&p, r, &rlo, lw, 0, 0, avli, 1);
+    int acc = construeer_puzzels(&p, r, &rlo, lw, 0, avli, 1);
     return (acc > 0) ? acc : -1;
 }
 
