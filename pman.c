@@ -62,7 +62,7 @@ typedef struct {
     bool is_letter_verstrekt[AANTAL_LETTERS];
     bool is_waarde_verstrekt[GRONDGETAL_MAX];
     int kolom[GRONDGETAL_MAX + 1];
-    int letters[GRONDGETAL_MAX + 1];
+    char letters[GRONDGETAL_MAX + 1];
     int laatste_letter;
     int aantal_letters;
     int c[GRONDGETAL_MAX];
@@ -359,7 +359,7 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
     int acc = 0;
 
     if (li >= lw - 1) {
-        pman_oplossing_t o = {.oplossingen = 0, .zoek_uniek = true};
+        pman_oplossing_t o = {.oplossingen = 0, .zoek_uniek = false};
 
         p->handle.lengtes[2] = li;
         if (max(p->handle.lengtes[0], p->handle.lengtes[1]) <
@@ -389,7 +389,7 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
     int s = min(avli + avl, p->aantal_letters);
     for (int i = 0; i < s; i++) {
         int _avl = avl;
-        if (i >= avli) {
+        if (i >= (avli + avl - 1)) {
             _avl++;
         }
 
@@ -485,7 +485,6 @@ void pman_zoek_oplossingen(const pman_handle_t* const h,
     rlo_init(&rlo, h->grondgetal);
     zoek_oplossing(p, o, &rlo, 0, 0);
 }
-
 int pman_contrueer_puzzels(const pman_handle_t* const h,
                            pman_puzzel_t* r) {
     pman_t* pi = CONTAINER_OF(h, pman_t, handle);
@@ -528,7 +527,7 @@ pman_res_t pman_waarde_ontdoe(const pman_handle_t* const h, char l) {
 void pman_print(const pman_handle_t* const h) {
     pman_t* p = CONTAINER_OF(h, pman_t, handle);
 
-    printf("Grontgetal: %i \n", h->grondgetal);
+    printf("Grondgetal: %i \n", h->grondgetal);
 
     printf("Puzzel:\n");
     for (int z = 0; z < AANTAL_WOORDEN; z++) {
