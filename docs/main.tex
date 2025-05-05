@@ -171,13 +171,26 @@ Het lijkt erop dat mijn algoritme niet volledig klopt, aangezien er voor puzzel 
 Mijn algoritme vind 5489 unieke puzzels. Ik krijg niet gevonden waar dit in zit, mogelijk gaat er iets fout bij een edge case. 
 Echter vind mijn algoritme daadwerkelijk 5489 unieke puzzels, aangezien elke gevonden puzzel ook een unieke oplossing heeft; dit vergeleken met alle andere gevonden puzzels.
 Zie bash command hieronder, alle combinatie letter allocaties van alle oplossingen in SINT\_KLAAS\_oplossingen.txt zijn uniek.
-Dit is echter maar een snelle sanity check, het bewijst niet dat mijn oplosser geen fout bevat.
+
+In SINT\_KLAAS\_alle\_sommen\_met\_flip.txt zijn alle oplossingen gepresenteerd als cijfer som in base 9.
+Hier heb ik ook de geflipte versie in staan van de sommen (A+B=C en B+A=C).
+Wederom zijn hier alle sommen uniek.
+Ook zitten er geen fouten in de sommen, zie valideer\_alle\_sommen.sh.
+
+Ik heb gecontroleerd of alle sommen ook daadwerkelijk maar 1 unieke oplossing hebben met een brute force algoritme (SINT\_KLAAS\_brute\_force.txt), en ja alle sommen hebben exact 1 unieke oplossing.
+
+Al deze testen zijn maar sanity checks, maar aangezien alle sommen in SINT\_KLAAS\_alle\_sommen\_met\_flip.txt uniek zijn, betekend dit niet dat inderdaad alle gevonden puzzels uniek zijn? 
+Misschien mis ik iets in het begrip van wat een unieke puzzel is.
 
 \begin{lstlisting}
     $ rm SINT_KLAAS_oplossingen.txt ; for t in $(cat SINT_KLAAS_gevonden_puzzels.txt) ; do echo "1 9 SINT KLAAS $t 3 4 3" | ./WoordSomPuzzel >> SINT_KLAAS_oplossingen.txt ; done
     $ cat SINT_KLAAS_oplossingen.txt | grep "De puzzel kent" | grep -v "De puzzel kent 1" # kijk of er puzzels met meer dan 1 oplossingen zijn.
     $ cat SINT_KLAAS_oplossingen.txt | grep "^ T=. S=" | sort | uniq -c | awk '$1 > 1' # kijk of alle letter allocaties uniek zijn.
+    $ cat SINT_KLAAS_alle_sommen_met_flip.txt | sort | uniq -c | awk '$1 > 1' # kijk of sommen, dus alle puzzels uniek zijn.
+    $ cat SINT_KLAAS_brute_force.txt | grep "De puzzel kent" | awk '$4 > 1' $ kijk of alle puzzels maar 1 unieke oplossing kennen.
+    $ ./valideer_alle_sommen.sh # controleert of alle sommen in SINT_KLAAS_alle_sommen_met_flip.txt goed zijn.
 \end{lstlisting}
+
 
 \newpage
 \begin{appendices}
