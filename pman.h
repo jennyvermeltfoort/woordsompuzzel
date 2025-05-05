@@ -73,7 +73,6 @@ typedef struct {
                                     hele puzzel, gevuld vanaf 0 tot
                                     size - 1. */
     int size;                    /**! De lengte van letters[]. */
-    int bekeken;                 /**! Het aantal bekeken woorden. */
 } pman_puzzel_t;
 
 /**

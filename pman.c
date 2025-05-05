@@ -359,6 +359,18 @@ void zoek_oplossing(pman_t* p, pman_oplossing_t* o, rlo_t* rlo,
 int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
                        int lw, int li, int avli, int avl) {
     int acc = 0;
+    pman_puzzel_t* shres = NULL;
+    int* shacc = NULL;
+    int shmidres = 0;
+    int shmidacc = 0;
+    int pids[GRONDGETAL_MAX] = {0};
+
+    if (li == 0) {
+        shmidacc = shmget(0, sizeof(int), IPC_CREAT | 0644);
+        shmidres = shmget(1, sizeof(pman_puzzel_t), IPC_CREAT | 0644);
+        shacc = (int*)shmat(shmidacc, NULL, 0);
+        shres = (pman_puzzel_t*)shmat(shmidres, NULL, 0);
+    }
 
     if (li >= lw - 1) {
         pman_oplossing_t o = {.oplossingen = 0, .zoek_uniek = false};
@@ -373,28 +385,18 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
 
         waarde_ontdoe(p, p->handle.woord[2][0]);
 
-        if (o.oplossingen == 1 && r->size == 0) {
+        if (r != NULL && o.oplossingen == 1 && r->size == 0) {
             for (int i = 0; i < p->handle.lengtes[2]; i++) {
                 r->letter[i] = p->handle.woord[2][i];
             }
             r->size = p->handle.lengtes[2];
         }
 
-        r->bekeken++;
         acc += (o.oplossingen == 1);
     }
 
     if (li >= lw) {
         return acc;
-    }
-
-    int* accsh = NULL;
-    int shmid = 0;
-    int pids[GRONDGETAL_MAX] = {0};
-
-    if (li == 0) {
-        shmid = shmget(4, sizeof(int), IPC_CREAT | 0644);
-        accsh = (int*)shmat(shmid, NULL, 0);
     }
 
     int s = min(avli + avl, p->aantal_letters);
@@ -408,7 +410,8 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
         if (li == 0) {
             pids[i] = fork();
             if (pids[i] == 0) {
-                *accsh += construeer_puzzels(p, r, rlo, lw, li + 1,
+                pman_puzzel_t* _r = (i == 0) ? shres : NULL;
+                *shacc += construeer_puzzels(p, _r, rlo, lw, li + 1,
                                              avli, _avl);
                 exit(EXIT_SUCCESS);
             }
@@ -421,13 +424,15 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
 
     if (li == 0) {
         for (int i = 0; i < p->aantal_letters; i++) {
-            int stat;
-            while (waitpid(pids[i], &stat, WNOHANG) == 0);
+            while (waitpid(pids[i], NULL, WNOHANG) == 0);
         }
 
-        acc = *accsh;
-        shmdt(accsh);
-        shmctl(shmid, IPC_RMID, NULL);
+        memcpy(r, shres, sizeof(pman_puzzel_t));
+        acc = *shacc;
+        shmdt(shacc);
+        shmdt(shres);
+        shmctl(shmidacc, IPC_RMID, NULL);
+        shmctl(shmidres, IPC_RMID, NULL);
     }
 
     return acc;
