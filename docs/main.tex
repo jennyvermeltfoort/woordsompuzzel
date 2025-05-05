@@ -167,20 +167,14 @@ Zie de tabel hieronder voor de resultaten van verschillende puzzel constructies.
 \FloatBarrier
 
 \section*{Heuristiek}
-Het lijkt erop dat mijn algoritme niet volledig klopt, aangezien er voor puzzel $SINT+KLAAS=...$ bij grondgetal 9 4072 unieke puzzels gevonden zouden moeten worden.
-Mijn algoritme vind 5489 unieke puzzels. Ik krijg niet gevonden waar dit in zit, mogelijk gaat er iets fout bij een edge case. 
-Echter vind mijn algoritme daadwerkelijk 5489 unieke puzzels, aangezien elke gevonden puzzel ook een unieke oplossing heeft; dit vergeleken met alle andere gevonden puzzels.
-Zie bash command hieronder, alle combinatie letter allocaties van alle oplossingen in SINT\_KLAAS\_oplossingen.txt zijn uniek.
-
-In SINT\_KLAAS\_alle\_sommen\_met\_flip.txt zijn alle oplossingen gepresenteerd als cijfer som in base 9.
-Hier heb ik ook de geflipte versie in staan van de sommen (A+B=C en B+A=C).
-Wederom zijn hier alle sommen uniek.
-Ook zitten er geen fouten in de sommen, zie valideer\_alle\_sommen.sh.
-
-Ik heb gecontroleerd of alle sommen ook daadwerkelijk maar 1 unieke oplossing hebben met een brute force algoritme (SINT\_KLAAS\_brute\_force.txt), en ja alle sommen hebben exact 1 unieke oplossing.
-
-Al deze testen zijn maar sanity checks, maar aangezien alle sommen in SINT\_KLAAS\_alle\_sommen\_met\_flip.txt uniek zijn, betekend dit niet dat inderdaad alle gevonden puzzels uniek zijn? 
-Misschien mis ik iets in het begrip van wat een unieke puzzel is.
+Voor puzzel $SINT+KLAAS=...$ bij grondgetal 9 worden er 5489 unieke puzzels gevonde.
+Om de heuristiek van mijn code te verifieren heb ik een aantal testen uitgevoerd op deze puzzel.
+Het volgende is gecontroleerd:
+\begin{itemize}
+    \item Alle gevonden puzzels zijn daadwerkelijk uniek. (A+B=C en B+A=C) zijn uniek.
+    \item Gecontroleerd of alle puzzels daadwerkelijk maar 1 oplossing hebben met een brute force algoritme.
+    \item Gecontroleerd of alle puzzels correct zijn met een externe base 9 calculator, dus (A+B=C) in base 9.
+\end{itemize}
 
 \begin{lstlisting}
     $ rm SINT_KLAAS_oplossingen.txt ; for t in $(cat SINT_KLAAS_gevonden_puzzels.txt) ; do echo "1 9 SINT KLAAS $t 3 4 3" | ./WoordSomPuzzel >> SINT_KLAAS_oplossingen.txt ; done
