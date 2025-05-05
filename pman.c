@@ -13,7 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <sys/shm.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #define WAARDE_UNDF -1
 #define LETTER_UNDF 'z'
 #define GRONDGETAL_MIN 2
@@ -379,11 +381,20 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
         }
 
         r->bekeken++;
-        acc += (o.oplossingen == 1) ? 1 : 0;
+        acc += (o.oplossingen == 1);
     }
 
     if (li >= lw) {
         return acc;
+    }
+
+    int* accsh = NULL;
+    int shmid = 0;
+    int pids[GRONDGETAL_MAX] = {0};
+
+    if (li == 0) {
+        shmid = shmget(4, sizeof(int), IPC_CREAT | 0644);
+        accsh = (int*)shmat(shmid, NULL, 0);
     }
 
     int s = min(avli + avl, p->aantal_letters);
@@ -392,11 +403,31 @@ int construeer_puzzels(pman_t* p, pman_puzzel_t* r, rlo_t* rlo,
         if (i >= (avli + avl - 1)) {
             _avl++;
         }
-
         p->handle.woord[2][li] = p->letters[i];
 
-        acc += construeer_puzzels(p, r, rlo, lw, li + 1, avli, _avl);
+        if (li == 0) {
+            pids[i] = fork();
+            if (pids[i] == 0) {
+                *accsh += construeer_puzzels(p, r, rlo, lw, li + 1,
+                                             avli, _avl);
+                exit(EXIT_SUCCESS);
+            }
+        } else {
+            acc +=
+                construeer_puzzels(p, r, rlo, lw, li + 1, avli, _avl);
+        }
         p->handle.woord[2][li] = '\0';
+    }
+
+    if (li == 0) {
+        for (int i = 0; i < p->aantal_letters; i++) {
+            int stat;
+            while (waitpid(pids[i], &stat, WNOHANG) == 0);
+        }
+
+        acc = *accsh;
+        shmdt(accsh);
+        shmctl(shmid, IPC_RMID, NULL);
     }
 
     return acc;
@@ -506,8 +537,8 @@ int pman_contrueer_puzzels(const pman_handle_t* const h,
 
     rlo_init(&rlo, p.handle.grondgetal);
     int lw = max(p.handle.lengtes[0], p.handle.lengtes[1]) + 1;
-
     int acc = construeer_puzzels(&p, r, &rlo, lw, 0, avli, 1);
+
     return (acc > 0) ? acc : -1;
 }
 
